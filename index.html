@@ -61,6 +61,7 @@
       font-size: 1.3rem;
       color: var(--brown-deep);
       letter-spacing: 0.02em;
+      z-index: 110;
     }
     .nav-links { display: flex; gap: 2.2rem; list-style: none; }
     .nav-links a {
@@ -83,6 +84,29 @@
     }
     .nav-links a:hover { color: var(--text); }
     .nav-links a:hover::after { transform: scaleX(1); }
+
+    /* ─── HAMBURGER ─── */
+    .hamburger {
+      display: none;
+      flex-direction: column;
+      gap: 5px;
+      cursor: pointer;
+      padding: 4px;
+      z-index: 110;
+      background: none;
+      border: none;
+    }
+    .hamburger span {
+      display: block;
+      width: 24px;
+      height: 2px;
+      background: var(--text);
+      border-radius: 2px;
+      transition: transform 0.3s, opacity 0.3s;
+    }
+    .hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    .hamburger.open span:nth-child(2) { opacity: 0; }
+    .hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
 
     /* ─── HERO ─── */
     #home {
@@ -660,6 +684,7 @@
     /* ─── RESPONSIVE ─── */
     @media (max-width: 900px) {
       #home { grid-template-columns: 1fr; padding-top: 7rem; text-align: center; }
+      .hero-cta { justify-content: center; }
       .hero-visual { margin-top: 3rem; }
       .avatar-ring { width: 280px; height: 280px; }
       .avatar-inner { width: 240px; height: 240px; font-size: 5rem; }
@@ -670,14 +695,83 @@
       .about-sticky { position: static; }
       .skills-grid { grid-template-columns: 1fr 1fr; }
       .projects-grid { grid-template-columns: 1fr 1fr; }
+      .edu-grid { grid-template-columns: 1fr 1fr; }
       nav { padding: 1rem 1.5rem; }
       .nav-links { gap: 1.5rem; }
     }
-    @media (max-width: 600px) {
+
+    @media (max-width: 768px) {
+      /* Mobile nav — hamburger */
+      .hamburger { display: flex; }
+      .nav-links {
+        display: flex;
+        flex-direction: column;
+        gap: 0;
+        position: fixed;
+        top: 0; right: 0;
+        width: 75vw;
+        max-width: 320px;
+        height: 100vh;
+        background: var(--cream);
+        border-left: 1px solid var(--brown-light);
+        padding: 6rem 2rem 2rem;
+        transform: translateX(100%);
+        transition: transform 0.35s cubic-bezier(0.4,0,0.2,1);
+        box-shadow: -8px 0 32px var(--shadow);
+        z-index: 105;
+      }
+      .nav-links.open { transform: translateX(0); }
+      .nav-links li { border-bottom: 1px solid var(--brown-light); }
+      .nav-links a {
+        display: block;
+        padding: 1rem 0;
+        font-size: 1rem;
+        letter-spacing: 0.05em;
+      }
+      .nav-links a::after { display: none; }
+
+      /* Layout */
+      #home { min-height: auto; padding: 6rem 1.5rem 3rem; gap: 2rem; }
+      .hero-name { font-size: 3rem; }
+      .hero-visual { display: none; }
+      .hero-tagline { font-size: 1rem; }
+
+      #about { padding: 4rem 1.5rem; gap: 2rem; }
+      .stats-grid { grid-template-columns: repeat(3, 1fr); gap: 0.8rem; }
+      .stat-card { padding: 1rem; }
+      .stat-number { font-size: 1.5rem; }
+
       .skills-grid { grid-template-columns: 1fr; }
       .projects-grid { grid-template-columns: 1fr; }
-      .stats-grid { grid-template-columns: 1fr; }
-      section { padding: 5rem 1.5rem; }
+      .edu-grid { grid-template-columns: 1fr; }
+
+      section { padding: 4rem 1.5rem; }
+
+      /* Timeline */
+      .timeline { padding-left: 1.8rem; }
+      .timeline-dot { left: -2.2rem; }
+      .timeline-card { padding: 1.2rem 1.4rem; }
+
+      /* Contact */
+      #contact { padding: 4rem 1.5rem; border-radius: 24px; }
+      .contact-icons { flex-direction: column; align-items: center; }
+
+      /* Modal */
+      #modal-box { border-radius: 20px; }
+      #modal-thumb { height: 140px; font-size: 3.5rem; }
+      .modal-body { padding: 1.5rem 1.5rem 2rem; }
+      .modal-title { font-size: 1.4rem; }
+    }
+
+    @media (max-width: 480px) {
+      .stats-grid { grid-template-columns: repeat(3,1fr); gap: 0.5rem; }
+      .stat-card { padding: 0.8rem 0.5rem; }
+      .stat-label { font-size: 0.7rem; }
+      .lang-pills { gap: 0.5rem; }
+      .lang-pill { font-size: 0.82rem; padding: 0.4rem 0.9rem; }
+      .btn { padding: 0.75rem 1.5rem; font-size: 0.85rem; }
+      .section-title { margin-bottom: 2rem; }
+      #modal-overlay { padding: 1rem; }
     }
   </style>
 </head>
@@ -689,14 +783,17 @@
   <!-- NAV -->
   <nav id="navbar">
     <div class="nav-logo">DK</div>
-    <ul class="nav-links">
-      <li><a href="#home">Home</a></li>
-      <li><a href="#about">Over mij</a></li>
-      <li><a href="#skills">Skills</a></li>
-      <li><a href="#experience">Ervaring</a></li>
-      <li><a href="#education">Opleiding</a></li>
-      <li><a href="#projects">Projecten</a></li>
-      <li><a href="#contact">Contact</a></li>
+    <button class="hamburger" id="hamburger" aria-label="Menu openen">
+      <span></span><span></span><span></span>
+    </button>
+    <ul class="nav-links" id="nav-links">
+      <li><a href="#home" onclick="closeMenu()">Home</a></li>
+      <li><a href="#about" onclick="closeMenu()">Over mij</a></li>
+      <li><a href="#skills" onclick="closeMenu()">Skills</a></li>
+      <li><a href="#experience" onclick="closeMenu()">Ervaring</a></li>
+      <li><a href="#education" onclick="closeMenu()">Opleiding</a></li>
+      <li><a href="#projects" onclick="closeMenu()">Projecten</a></li>
+      <li><a href="#contact" onclick="closeMenu()">Contact</a></li>
     </ul>
   </nav>
 
@@ -753,7 +850,7 @@
         </div>
         <div class="stat-card">
           <div class="stat-number">3</div>
-          <div class="stat-label">Afgeronde projecten</div>
+          <div class="stat-label">Actieve projecten</div>
         </div>
       </div>
 
@@ -1042,6 +1139,22 @@
   </footer>
 
  <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+    // ─── HAMBURGER MENU ───
+    const hamburger = document.getElementById('hamburger');
+    const navLinks  = document.getElementById('nav-links');
+
+    hamburger.addEventListener('click', () => {
+      hamburger.classList.toggle('open');
+      navLinks.classList.toggle('open');
+      document.body.style.overflow = navLinks.classList.contains('open') ? 'hidden' : '';
+    });
+
+    function closeMenu() {
+      hamburger.classList.remove('open');
+      navLinks.classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
     // Scroll progress bar
     const progress = document.getElementById('progress');
     const navbar = document.getElementById('navbar');
